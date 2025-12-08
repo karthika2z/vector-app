@@ -227,7 +227,7 @@ export const CardAssessment: React.FC<CardAssessmentProps> = ({ apiKey, onComple
   }
 
   return (
-    <div className="flex flex-col h-full items-center justify-between py-6 px-4 max-w-lg mx-auto">
+    <div className="flex flex-col min-h-full items-center py-6 px-4 max-w-lg mx-auto overflow-y-auto">
       
       {/* Progress Bar */}
       <div className="w-full mb-6">
@@ -252,7 +252,7 @@ export const CardAssessment: React.FC<CardAssessmentProps> = ({ apiKey, onComple
       </div>
 
       {/* Card Area */}
-      <div className="flex-1 w-full flex items-center justify-center relative">
+      <div className="w-full flex items-center justify-center relative py-4">
         {/* Swipe Indicators */}
         <div 
           className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-vector-400 transition-opacity"
@@ -410,7 +410,7 @@ export const CardAssessment: React.FC<CardAssessmentProps> = ({ apiKey, onComple
       </div>
 
       {/* Bottom hint */}
-      <div className="mt-6 text-center">
+      <div className="mt-6 pb-4 text-center">
         <p className="text-slate-600 text-xs">
           There are no right or wrong answers. Go with your gut.
         </p>
