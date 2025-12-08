@@ -18,12 +18,12 @@ import {
   GraduationCap,
   Briefcase,
   ChevronRight,
-  Share2,
   Zap,
   Heart,
   Scale,
   Lightbulb,
-  Clock
+  Clock,
+  Share2
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -70,10 +70,9 @@ export const ProfileResult: React.FC<ProfileResultProps> = ({
   onRestart,
   onGoDeeper,
 }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'careers' | 'analysis'>('overview');
 
   // Safely access new fields with fallbacks
   const emoji = profile.archetype_emoji || '🎯';
@@ -96,19 +95,21 @@ export const ProfileResult: React.FC<ProfileResultProps> = ({
     five_year_vision: '',
   };
 
-  const downloadPlayerCard = async () => {
-    if (!cardRef.current) return;
+  const downloadReport = async () => {
+    if (!reportRef.current) return;
     setGenerating(true);
 
     try {
       const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(cardRef.current, {
+      const canvas = await html2canvas(reportRef.current, {
         backgroundColor: '#0f172a',
         scale: 2,
+        windowHeight: reportRef.current.scrollHeight,
+        height: reportRef.current.scrollHeight,
       });
 
       const link = document.createElement('a');
-      link.download = `careercompass-${profile.archetype.toLowerCase().replace(/\s+/g, '-')}.png`;
+      link.download = `careercompass-${profile.archetype.toLowerCase().replace(/\s+/g, '-')}-report.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch (err) {
@@ -152,14 +153,12 @@ export const ProfileResult: React.FC<ProfileResultProps> = ({
   ];
 
   return (
-    <div className="w-full min-h-full overflow-y-auto px-4 pb-24">
-      <div className="max-w-4xl mx-auto space-y-6 pt-6">
+    <div className="w-full min-h-full overflow-y-auto px-4 pb-32">
+      {/* Full Report Container - This is what gets captured for sharing */}
+      <div ref={reportRef} className="max-w-4xl mx-auto space-y-8 pt-6 bg-slate-950">
 
-        {/* ===== HERO SHAREABLE CARD ===== */}
-        <div
-          ref={cardRef}
-          className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden"
-        >
+        {/* ===== HERO SECTION ===== */}
+        <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-6 md:p-8 shadow-2xl overflow-hidden">
           {/* Gradient orbs */}
           <div className="absolute inset-0 opacity-20 pointer-events-none">
             <div className="absolute top-0 right-0 w-64 h-64 bg-vector-500 rounded-full blur-[100px]" />
@@ -222,34 +221,6 @@ export const ProfileResult: React.FC<ProfileResultProps> = ({
           </div>
         </div>
 
-        {/* Share Buttons */}
-        <div className="flex flex-wrap justify-center gap-3">
-          <button
-            onClick={downloadPlayerCard}
-            disabled={generating}
-            className="flex items-center space-x-2 px-5 py-2.5 bg-vector-600 hover:bg-vector-500 text-white rounded-full transition-all shadow-lg shadow-vector-900/30 disabled:opacity-50"
-          >
-            <Download className="w-4 h-4" />
-            <span>{generating ? 'Generating...' : 'Save Card'}</span>
-          </button>
-
-          <button
-            onClick={shareToTwitter}
-            className="flex items-center space-x-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-full transition-all"
-          >
-            <Twitter className="w-4 h-4" />
-            <span>Share</span>
-          </button>
-
-          <button
-            onClick={copyShareLink}
-            className="flex items-center space-x-2 px-5 py-2.5 border border-slate-700 hover:border-slate-600 text-slate-300 rounded-full transition-all"
-          >
-            {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-            <span>{copied ? 'Copied!' : 'Copy'}</span>
-          </button>
-        </div>
-
         {/* Go Deeper CTA */}
         {onGoDeeper && (
           <div className="bg-gradient-to-r from-vector-950 to-indigo-950 border border-vector-800 rounded-2xl p-5">
@@ -274,283 +245,271 @@ export const ProfileResult: React.FC<ProfileResultProps> = ({
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <div className="flex justify-center gap-2 border-b border-slate-800 pb-4">
-          {[
-            { id: 'overview', label: 'Overview', icon: Compass },
-            { id: 'careers', label: 'Career Paths', icon: Briefcase },
-            { id: 'analysis', label: 'Deep Analysis', icon: Brain },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-vector-600 text-white'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="text-sm font-medium">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ===== TAB CONTENT ===== */}
-
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Psychometric Scores */}
-            <Section title="Your Psychometric Profile" icon={<Brain className="w-5 h-5" />}>
-              <div className="grid gap-4">
-                {psychometricTraits.map((trait) => {
-                  const Icon = trait.icon;
-                  const value = psychScores[trait.key as keyof typeof psychScores] || 50;
-                  return (
-                    <div key={trait.key} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Icon className="w-4 h-4 text-vector-400" />
-                          <span className="text-sm text-slate-300">{trait.label}</span>
-                        </div>
-                        <span className="text-lg font-bold text-white">{value}</span>
-                      </div>
-                      <div className="relative h-3 bg-slate-800 rounded-full overflow-hidden">
-                        <div
-                          className={`absolute h-full bg-gradient-to-r ${trait.color} rounded-full transition-all duration-500`}
-                          style={{ width: `${value}%` }}
-                        />
-                      </div>
-                      <div className="flex justify-between text-[10px] text-slate-500">
-                        <span>{trait.low}</span>
-                        <span>{trait.high}</span>
-                      </div>
+        {/* ===== PSYCHOMETRIC PROFILE ===== */}
+        <Section title="Your Psychometric Profile" icon={<Brain className="w-5 h-5" />}>
+          <div className="grid gap-4">
+            {psychometricTraits.map((trait) => {
+              const Icon = trait.icon;
+              const value = psychScores[trait.key as keyof typeof psychScores] || 50;
+              return (
+                <div key={trait.key} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Icon className="w-4 h-4 text-vector-400" />
+                      <span className="text-sm text-slate-300">{trait.label}</span>
                     </div>
-                  );
-                })}
-              </div>
-            </Section>
-
-            {/* AI-Resilient Strengths */}
-            {careerGuidance.ai_resilient_strengths && careerGuidance.ai_resilient_strengths.length > 0 && (
-              <Section title="Your AI-Proof Superpowers" icon={<Shield className="w-5 h-5" />}>
-                <div className="grid gap-3">
-                  {careerGuidance.ai_resilient_strengths.map((strength, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-green-950/30 border border-green-900/50 rounded-lg">
-                      <div className="w-8 h-8 rounded-full bg-green-900/50 flex items-center justify-center text-green-400 font-bold text-sm">
-                        {i + 1}
-                      </div>
-                      <span className="text-green-200">{strength}</span>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {/* RIASEC Chart */}
-            <Section title="Holland Code (RIASEC)" icon={<Compass className="w-5 h-5" />}>
-              <div className="h-56 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="75%" data={riasecData}>
-                    <PolarGrid stroke="#334155" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                    <Radar dataKey="value" stroke="#0ea5e9" strokeWidth={2} fill="#0ea5e9" fillOpacity={0.3} />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="grid grid-cols-3 gap-2 mt-4">
-                {riasecData.map((item, i) => (
-                  <div key={i} className="text-center p-2 bg-slate-800/50 rounded-lg">
-                    <span className="text-xs text-slate-500">{item.fullName}</span>
-                    <span className="block text-white font-bold">{item.value}</span>
+                    <span className="text-lg font-bold text-white">{value}</span>
                   </div>
-                ))}
-              </div>
-            </Section>
+                  <div className="relative h-3 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className={`absolute h-full bg-gradient-to-r ${trait.color} rounded-full transition-all duration-500`}
+                      style={{ width: `${value}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-slate-500">
+                    <span>{trait.low}</span>
+                    <span>{trait.high}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
+        </Section>
+
+        {/* ===== AI-RESILIENT STRENGTHS ===== */}
+        {careerGuidance.ai_resilient_strengths && careerGuidance.ai_resilient_strengths.length > 0 && (
+          <Section title="Your AI-Proof Superpowers" icon={<Shield className="w-5 h-5" />}>
+            <div className="grid gap-3">
+              {careerGuidance.ai_resilient_strengths.map((strength, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 bg-green-950/30 border border-green-900/50 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-green-900/50 flex items-center justify-center text-green-400 font-bold text-sm">
+                    {i + 1}
+                  </div>
+                  <span className="text-green-200">{strength}</span>
+                </div>
+              ))}
+            </div>
+          </Section>
         )}
 
-        {activeTab === 'careers' && (
-          <div className="space-y-6">
-            {/* Recommended Majors */}
-            {careerGuidance.recommended_majors && careerGuidance.recommended_majors.length > 0 && (
-              <Section title="Recommended Majors" icon={<GraduationCap className="w-5 h-5" />}>
-                <div className="grid gap-4">
-                  {careerGuidance.recommended_majors.map((major, i) => (
-                    <div key={i} className="p-4 bg-slate-800/50 border border-slate-700 rounded-xl hover:border-vector-600 transition-all">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="text-lg font-bold text-white">{major.name}</h4>
-                        <AIOutlookBadge outlook={major.ai_outlook} />
-                      </div>
-                      <p className="text-sm text-slate-400">{major.fit_reason}</p>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            )}
+        {/* ===== HOLLAND CODE / RIASEC ===== */}
+        <Section title="Holland Code (RIASEC)" icon={<Compass className="w-5 h-5" />}>
+          <div className="h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart cx="50%" cy="50%" outerRadius="75%" data={riasecData}>
+                <PolarGrid stroke="#334155" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                <Radar dataKey="value" stroke="#0ea5e9" strokeWidth={2} fill="#0ea5e9" fillOpacity={0.3} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            {riasecData.map((item, i) => (
+              <div key={i} className="text-center p-2 bg-slate-800/50 rounded-lg">
+                <span className="text-xs text-slate-500">{item.fullName}</span>
+                <span className="block text-white font-bold">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
 
-            {/* Career Paths */}
-            {careerGuidance.career_paths && careerGuidance.career_paths.length > 0 && (
-              <Section title="Career Paths for You" icon={<Briefcase className="w-5 h-5" />}>
-                <div className="grid gap-4">
-                  {careerGuidance.career_paths.map((career, i) => (
-                    <div key={i} className="p-5 bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700 rounded-xl hover:border-vector-600 transition-all group">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h4 className="text-xl font-bold text-white group-hover:text-vector-300 transition-colors">
-                            {career.title}
-                          </h4>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="text-green-400 font-medium">{career.salary_range}</span>
-                            <GrowthBadge growth={career.growth_potential} />
-                          </div>
-                        </div>
-                        <AIOutlookBadge outlook={career.ai_outlook} />
-                      </div>
-                      <p className="text-slate-400 text-sm mb-3">{career.description}</p>
-                      <div className="p-3 bg-vector-950/50 border border-vector-900 rounded-lg">
-                        <div className="text-xs text-vector-400 uppercase tracking-wider mb-1">Why You'd Excel</div>
-                        <p className="text-vector-200 text-sm">{career.why_you}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {/* Skills to Develop */}
-            {careerGuidance.skills_to_develop && careerGuidance.skills_to_develop.length > 0 && (
-              <Section title="Skills to Develop Now" icon={<Rocket className="w-5 h-5" />}>
-                <div className="flex flex-wrap gap-2">
-                  {careerGuidance.skills_to_develop.map((skill, i) => (
-                    <span key={i} className="px-4 py-2 bg-vector-900/50 border border-vector-700 text-vector-200 rounded-lg text-sm font-medium">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {/* Paths to Avoid */}
-            {careerGuidance.avoid_these && careerGuidance.avoid_these.length > 0 && (
-              <Section title="Paths That May Drain You" icon={<AlertTriangle className="w-5 h-5" />}>
-                <div className="space-y-2">
-                  {careerGuidance.avoid_these.map((path, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-red-950/20 border border-red-900/30 rounded-lg">
-                      <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-                      <span className="text-red-200/80 text-sm">{path}</span>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            )}
-
-            {/* Action Plan */}
-            {(careerGuidance.one_year_action || careerGuidance.five_year_vision) && (
-              <div className="grid md:grid-cols-2 gap-4">
-                {careerGuidance.one_year_action && (
-                  <div className="p-5 bg-gradient-to-br from-amber-950/30 to-orange-950/30 border border-amber-800/50 rounded-xl">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Target className="w-5 h-5 text-amber-400" />
-                      <h4 className="text-sm font-bold text-amber-300 uppercase tracking-wider">1-Year Action</h4>
-                    </div>
-                    <p className="text-amber-100">{careerGuidance.one_year_action}</p>
+        {/* ===== RECOMMENDED MAJORS ===== */}
+        {careerGuidance.recommended_majors && careerGuidance.recommended_majors.length > 0 && (
+          <Section title="Recommended Majors" icon={<GraduationCap className="w-5 h-5" />}>
+            <div className="grid gap-4">
+              {careerGuidance.recommended_majors.map((major, i) => (
+                <div key={i} className="p-4 bg-slate-800/50 border border-slate-700 rounded-xl hover:border-vector-600 transition-all">
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="text-lg font-bold text-white">{major.name}</h4>
+                    <AIOutlookBadge outlook={major.ai_outlook} />
                   </div>
-                )}
-                {careerGuidance.five_year_vision && (
-                  <div className="p-5 bg-gradient-to-br from-vector-950/30 to-indigo-950/30 border border-vector-800/50 rounded-xl">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Rocket className="w-5 h-5 text-vector-400" />
-                      <h4 className="text-sm font-bold text-vector-300 uppercase tracking-wider">5-Year Vision</h4>
+                  <p className="text-sm text-slate-400">{major.fit_reason}</p>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* ===== CAREER PATHS ===== */}
+        {careerGuidance.career_paths && careerGuidance.career_paths.length > 0 && (
+          <Section title="Career Paths for You" icon={<Briefcase className="w-5 h-5" />}>
+            <div className="grid gap-4">
+              {careerGuidance.career_paths.map((career, i) => (
+                <div key={i} className="p-5 bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700 rounded-xl hover:border-vector-600 transition-all group">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="text-xl font-bold text-white group-hover:text-vector-300 transition-colors">
+                        {career.title}
+                      </h4>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-green-400 font-medium">{career.salary_range}</span>
+                        <GrowthBadge growth={career.growth_potential} />
+                      </div>
                     </div>
-                    <p className="text-vector-100">{careerGuidance.five_year_vision}</p>
+                    <AIOutlookBadge outlook={career.ai_outlook} />
                   </div>
-                )}
+                  <p className="text-slate-400 text-sm mb-3">{career.description}</p>
+                  <div className="p-3 bg-vector-950/50 border border-vector-900 rounded-lg">
+                    <div className="text-xs text-vector-400 uppercase tracking-wider mb-1">Why You'd Excel</div>
+                    <p className="text-vector-200 text-sm">{career.why_you}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* ===== SKILLS TO DEVELOP ===== */}
+        {careerGuidance.skills_to_develop && careerGuidance.skills_to_develop.length > 0 && (
+          <Section title="Skills to Develop Now" icon={<Rocket className="w-5 h-5" />}>
+            <div className="flex flex-wrap gap-2">
+              {careerGuidance.skills_to_develop.map((skill, i) => (
+                <span key={i} className="px-4 py-2 bg-vector-900/50 border border-vector-700 text-vector-200 rounded-lg text-sm font-medium">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* ===== PATHS TO AVOID ===== */}
+        {careerGuidance.avoid_these && careerGuidance.avoid_these.length > 0 && (
+          <Section title="Paths That May Drain You" icon={<AlertTriangle className="w-5 h-5" />}>
+            <div className="space-y-2">
+              {careerGuidance.avoid_these.map((path, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 bg-red-950/20 border border-red-900/30 rounded-lg">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span className="text-red-200/80 text-sm">{path}</span>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* ===== ACTION PLAN ===== */}
+        {(careerGuidance.one_year_action || careerGuidance.five_year_vision) && (
+          <div className="grid md:grid-cols-2 gap-4">
+            {careerGuidance.one_year_action && (
+              <div className="p-5 bg-gradient-to-br from-amber-950/30 to-orange-950/30 border border-amber-800/50 rounded-xl">
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className="w-5 h-5 text-amber-400" />
+                  <h4 className="text-sm font-bold text-amber-300 uppercase tracking-wider">1-Year Action</h4>
+                </div>
+                <p className="text-amber-100">{careerGuidance.one_year_action}</p>
+              </div>
+            )}
+            {careerGuidance.five_year_vision && (
+              <div className="p-5 bg-gradient-to-br from-vector-950/30 to-indigo-950/30 border border-vector-800/50 rounded-xl">
+                <div className="flex items-center gap-2 mb-3">
+                  <Rocket className="w-5 h-5 text-vector-400" />
+                  <h4 className="text-sm font-bold text-vector-300 uppercase tracking-wider">5-Year Vision</h4>
+                </div>
+                <p className="text-vector-100">{careerGuidance.five_year_vision}</p>
               </div>
             )}
           </div>
         )}
 
-        {activeTab === 'analysis' && (
-          <div className="space-y-6">
+        {/* ===== DEEP ANALYSIS SECTION ===== */}
+        <div className="border-t border-slate-800 pt-8 mt-8">
+          <h2 className="text-xl font-bold text-white mb-6 text-center">Deep Analysis</h2>
+
+          <div className="grid md:grid-cols-2 gap-6">
             {/* Core Drivers */}
-            <Section title="Core Drivers" icon={<Target className="w-5 h-5" />}>
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+              <div className="flex items-center space-x-2 mb-3">
+                <Target className="w-4 h-4 text-vector-400" />
+                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Core Drivers</h3>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {profile.top_drivers.map((driver, i) => (
-                  <span key={i} className="px-4 py-2 bg-vector-900/50 border border-vector-700 text-vector-200 rounded-full text-sm font-medium">
+                  <span key={i} className="px-3 py-1.5 bg-vector-900/50 border border-vector-700 text-vector-200 rounded-full text-sm">
                     {driver}
                   </span>
                 ))}
               </div>
-            </Section>
+            </div>
 
             {/* Strength Signals */}
-            <Section title="Strength Signals" icon={<Sparkles className="w-5 h-5" />}>
-              <ul className="space-y-2">
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+              <div className="flex items-center space-x-2 mb-3">
+                <Sparkles className="w-4 h-4 text-vector-400" />
+                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Strength Signals</h3>
+              </div>
+              <ul className="space-y-1.5">
                 {profile.strength_signals.map((strength, i) => (
                   <li key={i} className="flex items-start text-sm text-slate-300">
-                    <span className="mr-3 mt-1.5 w-2 h-2 bg-vector-400 rounded-full shrink-0" />
+                    <span className="mr-2 mt-1.5 w-1.5 h-1.5 bg-vector-400 rounded-full shrink-0" />
                     {strength}
                   </li>
                 ))}
               </ul>
-            </Section>
+            </div>
 
             {/* Behavioral Tendencies */}
-            <Section title="Behavioral Tendencies" icon={<Brain className="w-5 h-5" />}>
-              <ul className="space-y-2">
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+              <div className="flex items-center space-x-2 mb-3">
+                <Brain className="w-4 h-4 text-indigo-400" />
+                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Behavioral Tendencies</h3>
+              </div>
+              <ul className="space-y-1.5">
                 {profile.behavioral_tendencies.map((item, i) => (
                   <li key={i} className="flex items-start text-sm text-slate-300">
-                    <span className="mr-3 mt-1.5 w-2 h-2 bg-indigo-400 rounded-full shrink-0" />
+                    <span className="mr-2 mt-1.5 w-1.5 h-1.5 bg-indigo-400 rounded-full shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
-            </Section>
+            </div>
 
             {/* Motivational Patterns */}
-            <Section title="Motivational Patterns" icon={<Heart className="w-5 h-5" />}>
-              <ul className="space-y-2">
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5">
+              <div className="flex items-center space-x-2 mb-3">
+                <Heart className="w-4 h-4 text-pink-400" />
+                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Motivational Patterns</h3>
+              </div>
+              <ul className="space-y-1.5">
                 {profile.motivational_patterns.map((pattern, i) => (
                   <li key={i} className="flex items-start text-sm text-slate-300">
-                    <span className="mr-3 mt-1.5 w-2 h-2 bg-pink-400 rounded-full shrink-0" />
+                    <span className="mr-2 mt-1.5 w-1.5 h-1.5 bg-pink-400 rounded-full shrink-0" />
                     {pattern}
                   </li>
                 ))}
               </ul>
-            </Section>
+            </div>
 
             {/* Environmental Needs */}
-            <Section title="Environmental Needs" icon={<Compass className="w-5 h-5" />}>
-              <ul className="space-y-2">
+            <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 md:col-span-2">
+              <div className="flex items-center space-x-2 mb-3">
+                <Compass className="w-4 h-4 text-green-400" />
+                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">Environmental Needs</h3>
+              </div>
+              <ul className="grid md:grid-cols-2 gap-2">
                 {profile.environmental_needs.map((need, i) => (
                   <li key={i} className="flex items-start text-sm text-slate-300">
-                    <span className="mr-3 mt-1.5 w-2 h-2 bg-green-400 rounded-full shrink-0" />
+                    <span className="mr-2 mt-1.5 w-1.5 h-1.5 bg-green-400 rounded-full shrink-0" />
                     {need}
                   </li>
                 ))}
               </ul>
-            </Section>
-
-            {/* Areas to Explore */}
-            {profile.conflicts_or_unknowns && profile.conflicts_or_unknowns.length > 0 && (
-              <div className="bg-amber-950/20 border border-amber-900/30 rounded-2xl p-6">
-                <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider mb-4">Areas to Explore Further</h3>
-                <ul className="space-y-2">
-                  {profile.conflicts_or_unknowns.map((item, i) => (
-                    <li key={i} className="flex items-start text-sm text-amber-200/70">
-                      <ChevronRight className="w-4 h-4 text-amber-500 mr-2 mt-0.5 shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            </div>
           </div>
-        )}
+
+          {/* Areas to Explore */}
+          {profile.conflicts_or_unknowns && profile.conflicts_or_unknowns.length > 0 && (
+            <div className="mt-6 bg-amber-950/20 border border-amber-900/30 rounded-2xl p-6">
+              <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider mb-4">Areas to Explore Further</h3>
+              <ul className="space-y-2">
+                {profile.conflicts_or_unknowns.map((item, i) => (
+                  <li key={i} className="flex items-start text-sm text-amber-200/70">
+                    <ChevronRight className="w-4 h-4 text-amber-500 mr-2 mt-0.5 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
 
         {/* Disclaimers */}
         <div className="bg-slate-900/30 border border-slate-800 p-4 rounded-lg">
@@ -558,12 +517,39 @@ export const ProfileResult: React.FC<ProfileResultProps> = ({
             <p key={i} className="text-slate-500 text-xs text-center">{d}</p>
           ))}
         </div>
+      </div>
 
-        {/* Bottom Actions */}
-        <div className="flex justify-center gap-4 pb-8">
+      {/* ===== STICKY BOTTOM BAR ===== */}
+      <div className="fixed bottom-0 left-0 right-0 bg-slate-950/95 backdrop-blur-lg border-t border-slate-800 p-4 z-50">
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={downloadReport}
+            disabled={generating}
+            className="flex items-center space-x-2 px-5 py-2.5 bg-vector-600 hover:bg-vector-500 text-white rounded-full transition-all shadow-lg shadow-vector-900/30 disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            <span>{generating ? 'Generating...' : 'Save Report'}</span>
+          </button>
+
+          <button
+            onClick={shareToTwitter}
+            className="flex items-center space-x-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-full transition-all"
+          >
+            <Twitter className="w-4 h-4" />
+            <span>Share</span>
+          </button>
+
+          <button
+            onClick={copyShareLink}
+            className="flex items-center space-x-2 px-5 py-2.5 border border-slate-700 hover:border-slate-600 text-slate-300 rounded-full transition-all"
+          >
+            {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+            <span>{copied ? 'Copied!' : 'Copy'}</span>
+          </button>
+
           <button
             onClick={onRestart}
-            className="flex items-center space-x-2 px-6 py-3 border border-slate-700 hover:border-slate-600 text-slate-300 rounded-full transition-all"
+            className="flex items-center space-x-2 px-5 py-2.5 border border-slate-700 hover:border-slate-600 text-slate-400 rounded-full transition-all"
           >
             <RefreshCcw className="w-4 h-4" />
             <span>Start Over</span>
