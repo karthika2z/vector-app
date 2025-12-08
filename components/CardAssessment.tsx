@@ -380,7 +380,7 @@ export const CardAssessment: React.FC<CardAssessmentProps> = ({ apiKey, onComple
                   className="w-full text-left p-4 bg-slate-800/50 hover:bg-vector-900/30 border border-slate-700 hover:border-vector-600 rounded-xl transition-all group disabled:opacity-50"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="shrink-0 w-6 h-6 rounded-full bg-vector-900 border border-vector-700 flex items-center justify-center text-vector-300 text-xs font-bold group-hover:bg-vector-700 group-hover:text-white transition-all">
+                    <span className="shrink-0 w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-400 text-xs font-bold group-hover:bg-vector-700 group-hover:border-vector-600 group-hover:text-white transition-all">
                       A
                     </span>
                     <span className="text-slate-300 text-sm leading-relaxed group-hover:text-white transition-colors">
@@ -395,7 +395,7 @@ export const CardAssessment: React.FC<CardAssessmentProps> = ({ apiKey, onComple
                   className="w-full text-left p-4 bg-slate-800/50 hover:bg-indigo-900/30 border border-slate-700 hover:border-indigo-600 rounded-xl transition-all group disabled:opacity-50"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="shrink-0 w-6 h-6 rounded-full bg-indigo-900 border border-indigo-700 flex items-center justify-center text-indigo-300 text-xs font-bold group-hover:bg-indigo-700 group-hover:text-white transition-all">
+                    <span className="shrink-0 w-6 h-6 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center text-slate-400 text-xs font-bold group-hover:bg-indigo-700 group-hover:border-indigo-600 group-hover:text-white transition-all">
                       B
                     </span>
                     <span className="text-slate-300 text-sm leading-relaxed group-hover:text-white transition-colors">
