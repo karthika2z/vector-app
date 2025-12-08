@@ -105,18 +105,41 @@ function getAdaptationNotes(choices: CardChoice[], coveredAspects: Set<string>):
   return notes.length > 0 ? notes.join(' ') : "Continue with natural flow.";
 }
 
+// Shuffle array using Fisher-Yates algorithm (seeded for consistency per session)
+function shuffleArray<T>(array: T[], seed: number): T[] {
+  const shuffled = [...array];
+  let m = shuffled.length;
+  while (m) {
+    const i = Math.floor((seed = (seed * 9301 + 49297) % 233280) / 233280 * m--);
+    [shuffled[m], shuffled[i]] = [shuffled[i], shuffled[m]];
+  }
+  return shuffled;
+}
+
+// Generate a session seed once (persists for the assessment)
+const sessionSeed = Date.now();
+
 function selectNextTarget(choices: CardChoice[], coveredAspects: Set<string>): { dimension: string; aspect: string } {
-  const dimensions = Object.entries(FRAMEWORK_DIMENSIONS);
-  
-  for (const [dimKey, dim] of dimensions) {
+  // Collect all uncovered aspects from all dimensions
+  const uncovered: { dimKey: string; dimName: string; aspect: string }[] = [];
+
+  for (const [dimKey, dim] of Object.entries(FRAMEWORK_DIMENSIONS)) {
     for (const aspect of dim.aspects) {
       const key = `${dimKey}.${aspect}`;
       if (!coveredAspects.has(key)) {
-        return { dimension: dim.name, aspect: aspect.replace(/_/g, ' ') };
+        uncovered.push({ dimKey, dimName: dim.name, aspect });
       }
     }
   }
-  
+
+  if (uncovered.length > 0) {
+    // Shuffle uncovered aspects to get variety instead of always starting with analytical
+    const shuffled = shuffleArray(uncovered, sessionSeed + choices.length);
+    const selected = shuffled[0];
+    return { dimension: selected.dimName, aspect: selected.aspect.replace(/_/g, ' ') };
+  }
+
+  // Fallback if all aspects covered
   const behavioralAspects = FRAMEWORK_DIMENSIONS.behavioralOS.aspects;
   const aspect = behavioralAspects[choices.length % behavioralAspects.length];
   return { dimension: "Behavioral Operating System", aspect: aspect.replace(/_/g, ' ') };

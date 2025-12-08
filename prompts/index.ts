@@ -324,10 +324,12 @@ ${adaptationNotes}
 
 ### Requirements
 Generate a scenario card that:
-1. Presents a realistic, relatable situation
+1. Presents a realistic, relatable situation for a high school or college student
 2. Offers two genuinely different approaches (not obviously "right" vs "wrong")
 3. Reveals something meaningful about the target aspect
 4. Is concise and clear (designed for quick gut decisions)
+5. Uses VARIED contexts - rotate between: social situations, school projects, hobbies, part-time jobs, creative pursuits, sports/activities, volunteer work, family dynamics, friend groups, personal decisions
+6. AVOID repetitive corporate/data/analytics themes unless specifically probing analytical traits
 
 ### Output Format
 Return ONLY valid JSON, no markdown:
