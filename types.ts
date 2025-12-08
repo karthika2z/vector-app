@@ -1,5 +1,7 @@
 export interface VectorProfile {
   archetype: string;
+  archetype_emoji: string;
+  tagline: string;
   top_drivers: string[];
   strength_signals: string[];
   interest_inclinations: string[];
@@ -14,6 +16,14 @@ export interface VectorProfile {
     enterprising: number;
     conventional: number;
   };
+  psychometric_scores: {
+    risk_tolerance: number;
+    empathy_orientation: number;
+    execution_bias: number;
+    cognitive_flexibility: number;
+    intrinsic_vs_extrinsic: number;
+    decisiveness: number;
+  };
   adjacent_forensics: {
     insights: string[];
     inferred_traits: string[];
@@ -21,6 +31,27 @@ export interface VectorProfile {
   potential_roles_or_paths: string[];
   conflicts_or_unknowns: string[];
   disclaimers: string[];
+  // NEW: Career guidance for AI era
+  career_guidance: {
+    ai_resilient_strengths: string[];
+    recommended_majors: Array<{
+      name: string;
+      fit_reason: string;
+      ai_outlook: 'thriving' | 'evolving' | 'at_risk';
+    }>;
+    career_paths: Array<{
+      title: string;
+      description: string;
+      why_you: string;
+      salary_range: string;
+      ai_outlook: 'thriving' | 'evolving' | 'at_risk';
+      growth_potential: 'high' | 'medium' | 'low';
+    }>;
+    skills_to_develop: string[];
+    avoid_these: string[];
+    one_year_action: string;
+    five_year_vision: string;
+  };
 }
 
 export enum AppState {

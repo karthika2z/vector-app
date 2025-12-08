@@ -108,10 +108,12 @@ Adjacent forensic questions (use sparingly, naturally triggered):
 
 ## OUTPUT PROFILE STRUCTURE
 
-When generating a profile, use this structure:
+When generating a profile, use this EXACT structure:
 
 {
-  "archetype": "The [Evocative Title]",
+  "archetype": "The [Evocative 2-3 Word Title]",
+  "archetype_emoji": "[Single emoji that captures the archetype]",
+  "tagline": "[One compelling sentence that makes them feel seen]",
   "top_drivers": ["driver1", "driver2", "driver3"],
   "strength_signals": ["strength1", "strength2", "strength3", "strength4"],
   "interest_inclinations": ["inclination1", "inclination2", "inclination3"],
@@ -126,6 +128,14 @@ When generating a profile, use this structure:
     "enterprising": 0-10,
     "conventional": 0-10
   },
+  "psychometric_scores": {
+    "risk_tolerance": 0-100,
+    "empathy_orientation": 0-100,
+    "execution_bias": 0-100,
+    "cognitive_flexibility": 0-100,
+    "intrinsic_vs_extrinsic": 0-100,
+    "decisiveness": 0-100
+  },
   "adjacent_forensics": {
     "insights": ["insight1", "insight2"],
     "inferred_traits": ["trait1", "trait2", "trait3"]
@@ -136,8 +146,43 @@ When generating a profile, use this structure:
     "This is a conversational analysis, not a clinical or diagnostic tool.",
     "Career inclinations may evolve with new experiences or clarity.",
     "Patterns identified are probabilistic, not prescriptive."
-  ]
+  ],
+  "career_guidance": {
+    "ai_resilient_strengths": ["strength that AI cannot replace 1", "strength 2", "strength 3"],
+    "recommended_majors": [
+      {"name": "Major Name", "fit_reason": "Why this fits them", "ai_outlook": "thriving|evolving|at_risk"},
+      {"name": "Major 2", "fit_reason": "Reason", "ai_outlook": "thriving|evolving|at_risk"},
+      {"name": "Major 3", "fit_reason": "Reason", "ai_outlook": "thriving|evolving|at_risk"}
+    ],
+    "career_paths": [
+      {
+        "title": "Specific Job Title",
+        "description": "What they'd actually do day-to-day",
+        "why_you": "Why THIS person would excel here based on their patterns",
+        "salary_range": "$XX,000 - $XXX,000",
+        "ai_outlook": "thriving|evolving|at_risk",
+        "growth_potential": "high|medium|low"
+      }
+    ],
+    "skills_to_develop": ["skill1", "skill2", "skill3"],
+    "avoid_these": ["career/path that would drain them", "another mismatch"],
+    "one_year_action": "Specific actionable step they should take in the next year",
+    "five_year_vision": "Where they could be in 5 years if they lean into their strengths"
+  }
 }
+
+### SCORING GUIDELINES FOR PSYCHOMETRICS:
+- **risk_tolerance**: 0 = extremely conservative, 100 = high risk-taker. Derive from choices involving uncertainty, new ventures, safe vs bold options.
+- **empathy_orientation**: 0 = task/mission-first, 100 = people-first. Derive from how they prioritize relationships vs outcomes.
+- **execution_bias**: 0 = strategic/planning oriented, 100 = action/doing oriented. How quickly they move from thinking to doing.
+- **cognitive_flexibility**: 0 = deep focus specialist, 100 = rapid context-switcher. Their comfort with multitasking vs sustained attention.
+- **intrinsic_vs_extrinsic**: 0 = purely impact/passion driven, 100 = status/money driven. What actually motivates them.
+- **decisiveness**: 0 = highly deliberative, 100 = quick decisive. Based on reaction times and choice patterns.
+
+### AI OUTLOOK CATEGORIES:
+- **thriving**: Roles that AI amplifies and makes more valuable (creativity, strategy, human connection, complex judgment)
+- **evolving**: Roles that will change significantly but still need humans (augmented by AI tools)
+- **at_risk**: Roles where AI is likely to reduce demand significantly
 
 The profile must be:
 * Accurate to observed data
@@ -145,7 +190,8 @@ The profile must be:
 * Clear and specific
 * Non-judgmental
 * ND-friendly in language
-* Based strictly on observed patterns`;
+* Based strictly on observed patterns
+* ACTIONABLE - giving them clear next steps`;
 
 // =============================================================================
 // VOICE MODE ADDITIONS - Appended to system prompt for voice sessions
@@ -345,7 +391,7 @@ export function createAnalysisUserPrompt(
   choicesSummary: string,
   timingPatterns: string
 ): string {
-  return `## TASK: Analyze Assessment and Generate Profile
+  return `## TASK: Analyze Assessment and Generate Comprehensive Career Profile
 
 ### Assessment Data
 ${choicesSummary}
@@ -354,30 +400,80 @@ ${choicesSummary}
 ${timingPatterns}
 
 ### Analysis Instructions
-Synthesize this data into a career profile. Look for:
+Synthesize this data into a comprehensive career profile with ACTIONABLE guidance. Look for:
+
 1. **Innate Direction patterns** - Which cognitive styles emerged strongest?
 2. **Behavioral OS signals** - How do they operate day-to-day?
 3. **Life Texture clues** - What contextual needs and preferences surfaced?
 4. **Contradictions** - Any conflicting signals worth noting?
 5. **Timing insights** - What do fast vs slow decisions reveal about certainty?
 
-Create an evocative archetype name that captures their essence.
+### CRITICAL REQUIREMENTS:
+
+**Psychometric Scores (0-100):**
+Calculate REAL scores based on the assessment data - NOT placeholder 50s:
+- risk_tolerance: Derive from choices involving safe vs bold options
+- empathy_orientation: From people vs task prioritization choices
+- execution_bias: From planning vs action choices
+- cognitive_flexibility: From focus vs multitasking preferences
+- intrinsic_vs_extrinsic: From motivation-revealing choices
+- decisiveness: Calculate from timing data (fast = high, slow = low)
+
+**Career Guidance for the AI Era:**
+Provide SPECIFIC, ACTIONABLE career guidance:
+- 3 recommended majors with AI outlook (thriving/evolving/at_risk)
+- 4-5 specific career paths with real salary ranges and AI outlook
+- Skills they should develop NOW
+- Paths to AVOID based on their patterns
+- Concrete 1-year action step
+- Compelling 5-year vision
+
+**AI Outlook Guidelines:**
+- "thriving": Creativity, strategy, human connection, complex judgment roles
+- "evolving": Roles changing significantly but still human-needed
+- "at_risk": Roles where AI is reducing demand
 
 ### Output Format
-Return ONLY valid JSON matching the profile structure (no markdown):
+Return ONLY valid JSON (no markdown code blocks):
 {
-  "archetype": "The [Evocative Title]",
-  "top_drivers": [...],
-  "strength_signals": [...],
-  "interest_inclinations": [...],
-  "behavioral_tendencies": [...],
-  "motivational_patterns": [...],
-  "environmental_needs": [...],
-  "riasec_inferences": { "realistic": 0-10, ... },
+  "archetype": "The [Evocative 2-3 Word Title]",
+  "archetype_emoji": "[Single emoji]",
+  "tagline": "[One sentence that makes them feel understood]",
+  "top_drivers": ["driver1", "driver2", "driver3"],
+  "strength_signals": ["strength1", "strength2", "strength3", "strength4"],
+  "interest_inclinations": ["inclination1", "inclination2", "inclination3"],
+  "behavioral_tendencies": ["tendency1", "tendency2", "tendency3", "tendency4"],
+  "motivational_patterns": ["pattern1", "pattern2", "pattern3"],
+  "environmental_needs": ["need1", "need2", "need3"],
+  "riasec_inferences": { "realistic": 0-10, "investigative": 0-10, "artistic": 0-10, "social": 0-10, "enterprising": 0-10, "conventional": 0-10 },
+  "psychometric_scores": {
+    "risk_tolerance": 0-100,
+    "empathy_orientation": 0-100,
+    "execution_bias": 0-100,
+    "cognitive_flexibility": 0-100,
+    "intrinsic_vs_extrinsic": 0-100,
+    "decisiveness": 0-100
+  },
   "adjacent_forensics": { "insights": [...], "inferred_traits": [...] },
-  "potential_roles_or_paths": [...],
-  "conflicts_or_unknowns": [...],
-  "disclaimers": [...]
+  "potential_roles_or_paths": ["role1", "role2", "role3", "role4", "role5"],
+  "conflicts_or_unknowns": ["area1", "area2"],
+  "disclaimers": ["disclaimer1", "disclaimer2", "disclaimer3"],
+  "career_guidance": {
+    "ai_resilient_strengths": ["strength1", "strength2", "strength3"],
+    "recommended_majors": [
+      {"name": "Major Name", "fit_reason": "Why it fits", "ai_outlook": "thriving"},
+      {"name": "Major 2", "fit_reason": "Why", "ai_outlook": "evolving"},
+      {"name": "Major 3", "fit_reason": "Why", "ai_outlook": "thriving"}
+    ],
+    "career_paths": [
+      {"title": "Job Title", "description": "Day-to-day work", "why_you": "Why they'd excel", "salary_range": "$XX,000 - $XXX,000", "ai_outlook": "thriving", "growth_potential": "high"},
+      {"title": "Job 2", "description": "Work", "why_you": "Why", "salary_range": "$XX,000 - $XXX,000", "ai_outlook": "evolving", "growth_potential": "medium"}
+    ],
+    "skills_to_develop": ["skill1", "skill2", "skill3"],
+    "avoid_these": ["path to avoid 1", "path to avoid 2"],
+    "one_year_action": "Specific actionable step for the next year",
+    "five_year_vision": "Where they could be in 5 years"
+  }
 }`;
 }
 

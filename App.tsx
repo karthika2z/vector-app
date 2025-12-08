@@ -3,8 +3,8 @@ import { WelcomeScreen } from './components/WelcomeScreen';
 import { CardAssessment } from './components/CardAssessment';
 import { ProfileResult } from './components/ProfileResult';
 import { ActiveSession } from './components/ActiveSession';
-import { AppState, VectorProfile, CardTraitScores } from './types';
-import { CardChoice } from './utils/adaptive-cards';
+import { AppState, VectorProfile } from './types';
+import type { CardChoice } from './utils/adaptive-cards';
 import { CONFIG } from './config';
 import { Loader2 } from 'lucide-react';
 
@@ -42,26 +42,6 @@ const App: React.FC = () => {
     setAppState(AppState.RESULTS);
   };
 
-  // Calculate trait-like scores from choices for display
-  const calculateDisplayScores = (): CardTraitScores | null => {
-    if (cardChoices.length === 0) return null;
-    
-    const avgTime = cardChoices.reduce((sum, c) => sum + c.reactionTimeMs, 0) / cardChoices.length;
-    const decisivenessScore = Math.max(0, Math.min(100, 100 - ((avgTime - 3000) / 70)));
-    
-    // These are approximate scores based on choice patterns
-    // The real analysis is in the profile itself
-    return {
-      riskTolerance: 50,
-      empathy: 50,
-      execution: 50,
-      cognitiveStyle: 50,
-      motivation: 50,
-      avgReactionTime: avgTime,
-      decisivenessScore: Math.round(decisivenessScore),
-    };
-  };
-
   return (
     <div className="min-h-screen w-full flex flex-col bg-slate-950 text-slate-100 selection:bg-vector-500/30">
       
@@ -92,9 +72,8 @@ const App: React.FC = () => {
 
         {appState === AppState.RESULTS && profile && (
           <div className="flex-1 flex flex-col">
-            <ProfileResult 
+            <ProfileResult
               profile={profile}
-              traitScores={calculateDisplayScores()}
               onRestart={handleRestart}
               onGoDeeper={handleGoDeeper}
             />
