@@ -62,7 +62,7 @@ const App: React.FC = () => {
             <header className="p-4 flex items-center justify-center border-b border-slate-800/50">
               <span className="text-xs font-mono text-slate-500 uppercase tracking-widest">CareerCompass Assessment</span>
             </header>
-            <div className="flex-1">
+            <div className="flex-1 overflow-y-auto">
               <CardAssessment apiKey={apiKey} onComplete={handleAssessmentComplete} />
             </div>
           </div>
