@@ -356,26 +356,40 @@ export function createCardGenerationUserPrompt(
   cardNumber: number,
   adaptationNotes: string
 ): string {
-  return `## TASK: Generate Scenario Card #${cardNumber} of 15
+  return `## TASK: Generate Scenario Card #${cardNumber} of 10
 
 ### Target
 - **Dimension:** ${targetDimension}
 - **Aspect:** ${targetAspect}
 
-### Previous Choices
+### Previous Choices (READ CAREFULLY - DO NOT REPEAT SIMILAR SCENARIOS)
 ${previousChoices || "None yet - this is the first card."}
 
-### Adaptation Notes
+### Adaptation Notes (CRITICAL)
 ${adaptationNotes}
+
+### DIVERSITY RULES (STRICTLY FOLLOW)
+Each card MUST use a DIFFERENT scenario category. Categories to rotate through:
+1. Gaming/online activities (video games, streaming, online communities)
+2. Creative hobbies (art, music, writing, photography, crafts)
+3. Physical activities (sports, hiking, gym, dance)
+4. Social situations (parties, hangouts, meeting new people)
+5. Academic/learning (studying, research, presentations)
+6. Work/jobs (part-time job, internship, freelance)
+7. Family dynamics (home responsibilities, family events)
+8. Personal growth (skills, habits, self-improvement)
+9. Entertainment choices (movies, concerts, travel)
+10. Digital/tech decisions (apps, devices, online presence)
+
+**CRITICAL**: Look at the previous scenarios above. If you see "party", "event", "trip", or "planning" themes already used, you MUST pick something completely different like gaming, creative hobbies, or personal habits.
 
 ### Requirements
 Generate a scenario card that:
-1. Presents a realistic, relatable situation for a high school or college student
-2. Offers two genuinely different approaches (not obviously "right" vs "wrong")
-3. Reveals something meaningful about the target aspect
-4. Is concise and clear (designed for quick gut decisions)
-5. Uses VARIED contexts - rotate between: social situations, school projects, hobbies, part-time jobs, creative pursuits, sports/activities, volunteer work, family dynamics, friend groups, personal decisions
-6. AVOID repetitive corporate/data/analytics themes unless specifically probing analytical traits
+1. Uses a scenario category NOT yet used in this session
+2. Presents a realistic, relatable situation for ages 16-25
+3. Offers two genuinely different approaches (not obviously "right" vs "wrong")
+4. Reveals something meaningful about the target aspect through the SCENARIO TYPE, not by asking the same question in different contexts
+5. Is concise and clear (designed for quick gut decisions)
 
 ### Output Format
 Return ONLY valid JSON, no markdown:
@@ -480,7 +494,7 @@ Return ONLY valid JSON (no markdown code blocks):
 export function createDeepDiveUserPrompt(existingProfile: object): string {
   return `## CONTEXT: Deep Dive Session
 
-The user has completed a 15-card assessment. Here is their profile:
+The user has completed a 10-card assessment. Here is their profile:
 
 ${JSON.stringify(existingProfile, null, 2)}
 

@@ -9,7 +9,7 @@ interface CardAssessmentProps {
   onComplete: (choices: CardChoice[], profile: VectorProfile) => void;
 }
 
-const TOTAL_CARDS = 15;
+const TOTAL_CARDS = 10;
 
 const LOADING_MESSAGES = [
   "Crafting your next scenario...",

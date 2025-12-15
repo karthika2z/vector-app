@@ -65,43 +65,77 @@ export const FRAMEWORK_DIMENSIONS = {
   }
 };
 
+// Scenario themes to track for diversity
+export const SCENARIO_THEMES = [
+  "school_project", "social_event", "hobby_activity", "part_time_job",
+  "creative_pursuit", "sports_activity", "volunteer_work", "family_situation",
+  "friend_group", "personal_decision", "club_activity", "travel_plans"
+] as const;
+
 function formatPreviousChoices(choices: CardChoice[]): string {
   if (choices.length === 0) return "";
-  
+
   return choices.map((c, i) => {
     const chose = c.choice === 'A' ? c.card.optionA : c.card.optionB;
     const time = (c.reactionTimeMs / 1000).toFixed(1);
-    return `${i + 1}. "${c.card.scenario}" → Chose: "${chose}" (${time}s) [Probed: ${c.card.targetAspect}]`;
+    return `${i + 1}. "${c.card.context}: ${c.card.scenario}" → Chose: "${chose}" (${time}s) [Probed: ${c.card.targetAspect}]`;
   }).join('\n');
+}
+
+function extractUsedThemes(choices: CardChoice[]): string[] {
+  // Extract keywords from previous scenarios to avoid repetition
+  const themes: string[] = [];
+  const keywords = [
+    'study', 'project', 'party', 'trip', 'event', 'festival', 'game',
+    'job', 'work', 'team', 'group', 'friend', 'family', 'class',
+    'club', 'sport', 'volunteer', 'creative', 'art', 'music', 'plan'
+  ];
+
+  choices.forEach(c => {
+    const text = `${c.card.context} ${c.card.scenario}`.toLowerCase();
+    keywords.forEach(kw => {
+      if (text.includes(kw) && !themes.includes(kw)) {
+        themes.push(kw);
+      }
+    });
+  });
+
+  return themes;
 }
 
 function getAdaptationNotes(choices: CardChoice[], coveredAspects: Set<string>): string {
   if (choices.length === 0) {
     return "Start with an accessible, universally relatable scenario to ease them in.";
   }
-  
+
   const recentChoices = choices.slice(-3);
   const avgTime = recentChoices.reduce((sum, c) => sum + c.reactionTimeMs, 0) / recentChoices.length;
-  
+
   const notes: string[] = [];
-  
+
+  // Track used themes to avoid repetition
+  const usedThemes = extractUsedThemes(choices);
+  if (usedThemes.length > 0) {
+    notes.push(`AVOID these themes/contexts already used: ${usedThemes.join(', ')}. Pick a COMPLETELY DIFFERENT scenario type.`);
+  }
+
   if (avgTime < 3000) {
     notes.push("User decides quickly - they may be confident or impulsive. Consider a more nuanced scenario.");
   } else if (avgTime > 8000) {
     notes.push("User takes time to decide - they're thoughtful. Keep scenarios clear but substantive.");
   }
-  
+
   const lastThree = choices.slice(-3);
   const allA = lastThree.every(c => c.choice === 'A');
   const allB = lastThree.every(c => c.choice === 'B');
   if (allA || allB) {
     notes.push("User has chosen the same option pattern recently. Create a scenario where the opposite choice might appeal to them.");
   }
-  
+
   if (coveredAspects.size > 10) {
     notes.push("We've covered many aspects. Focus on areas with less clarity or potential contradictions.");
   }
-  
+
   return notes.length > 0 ? notes.join(' ') : "Continue with natural flow.";
 }
 
