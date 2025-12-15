@@ -28,8 +28,10 @@ export const FRAMEWORK_DIMENSIONS = {
   innateDirection: {
     name: "Innate Direction",
     aspects: [
+      "clinical_biotic",        // The Healer/Scientist - healthcare, biology, diagnostics
+      "advocacy_justice",       // The Defender - law, ethics, rights, debate
       "analytical_investigative",
-      "creative_expressive", 
+      "creative_expressive",
       "social_supportive",
       "practical_handson",
       "enterprising_vision",
@@ -40,13 +42,12 @@ export const FRAMEWORK_DIMENSIONS = {
   behavioralOS: {
     name: "Behavioral Operating System",
     aspects: [
+      "crisis_logic",           // Freeze, panic, or hyper-lucid in chaos (ER/Trauma aptitude)
+      "emotional_permeability", // Detached Concern vs Absorbed Empathy
       "decision_making_style",
       "ambiguity_tolerance",
-      "planning_vs_improvisation",
-      "energy_rhythms",
       "focus_patterns",
       "collaboration_style",
-      "confidence_calibration",
       "persistence_vs_adaptability"
     ],
     description: "How they actually move through life"
@@ -56,10 +57,8 @@ export const FRAMEWORK_DIMENSIONS = {
     aspects: [
       "risk_appetite",
       "motivation_drivers",
-      "social_bandwidth",
-      "stress_response",
-      "reward_sensitivity",
-      "autonomy_needs"
+      "sensory_preferences",    // Sensitivity to noise/blood/chaos
+      "self_regulation"
     ],
     description: "Contextual preferences and constraints"
   }
@@ -88,7 +87,9 @@ function extractUsedThemes(choices: CardChoice[]): string[] {
   const keywords = [
     'study', 'project', 'party', 'trip', 'event', 'festival', 'game',
     'job', 'work', 'team', 'group', 'friend', 'family', 'class',
-    'club', 'sport', 'volunteer', 'creative', 'art', 'music', 'plan'
+    'club', 'sport', 'volunteer', 'creative', 'art', 'music', 'plan',
+    'emergency', 'crisis', 'help', 'rule', 'fair', 'build', 'make',
+    'lab', 'research', 'ethical', 'dilemma', 'physical', 'object'
   ];
 
   choices.forEach(c => {
